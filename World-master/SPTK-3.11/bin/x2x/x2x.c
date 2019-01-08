@@ -700,8 +700,8 @@ void x2x(void *x1, void *x2, char c1, char c2, int clip)
       case 'f':
          if (xd > FLT_MAX || xd < (FLT_MAX * (-1)))
             fprintf(stderr,
-                    "%s : warning: input data is over the range of type 'float'!\n",
-                    cmnd);
+                    "%s : warning: %f input data is over the range of type 'float' (%f, %f) !\n",
+                    cmnd, xd, FLT_MAX, FLT_MAX * (-1));
          xd = ((xd <
                 (FLT_MAX * (-1))) ? (FLT_MAX * (-1)) : ((xd >
                                                          FLT_MAX) ? FLT_MAX :
@@ -839,8 +839,8 @@ void x2x(void *x1, void *x2, char c1, char c2, int clip)
       case 'f':
          if (xd > FLT_MAX || xd < (FLT_MAX * (-1))) {
             fprintf(stderr,
-                    "%s : error: input data is over the range of type 'float'!\n",
-                    cmnd);
+                    "%s : error: input data %f is over the range of type 'float' (%f, %f)!\n",
+                    cmnd, xd, FLT_MAX, FLT_MAX * (-1));
             exit(1);
          }
          break;
