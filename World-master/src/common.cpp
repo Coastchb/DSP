@@ -1,7 +1,6 @@
 //-----------------------------------------------------------------------------
-// Copyright 2012 Masanori Morise
+// Copyright 2012-2016 Masanori Morise. All Rights Reserved.
 // Author: mmorise [at] yamanashi.ac.jp (Masanori Morise)
-// Last update: 2017/04/29
 //
 // common.cpp includes functions used in at least two files.
 // (1) Common functions
@@ -24,6 +23,9 @@
 #include "world/matlabfunctions.h"
 
 namespace {
+//-----------------------------------------------------------------------------
+// SetParametersForLinearSmoothing() is used in LinearSmoothing()
+//-----------------------------------------------------------------------------
 static void SetParametersForLinearSmoothing(int boundary, int fft_size, int fs,
     double width, const double *power_spectrum, double *mirroring_spectrum,
     double *mirroring_segment, double *frequency_axis) {
@@ -44,26 +46,32 @@ static void SetParametersForLinearSmoothing(int boundary, int fft_size, int fs,
     frequency_axis[i] = static_cast<double>(i) / fft_size *
     fs - width / 2.0;
 }
-
 }  // namespace
 
 //-----------------------------------------------------------------------------
+// Fundamental functions
 int GetSuitableFFTSize(int sample) {
   return static_cast<int>(pow(2.0,
     static_cast<int>(log(static_cast<double>(sample)) / world::kLog2) + 1.0));
 }
 
-void DCCorrection(const double *input, double f0, int fs, int fft_size,
+//-----------------------------------------------------------------------------
+// DCCorrection() corrects the input spectrum from 0 to f0 Hz because the
+// general signal does not contain the DC (Direct Current) component.
+// It is used in CheapTrick() and D4C().
+//-----------------------------------------------------------------------------
+void DCCorrection(const double *input, double current_f0, int fs, int fft_size,
     double *output) {
-  int upper_limit = 2 + static_cast<int>(f0 * fft_size / fs);
+  int upper_limit = 1 +
+    static_cast<int>(1.2 * current_f0 * fft_size / fs);
   double *low_frequency_replica = new double[upper_limit];
   double *low_frequency_axis = new double[upper_limit];
 
   for (int i = 0; i < upper_limit; ++i)
     low_frequency_axis[i] = static_cast<double>(i) * fs / fft_size;
 
-  int upper_limit_replica = upper_limit - 1;
-  interp1Q(f0 - low_frequency_axis[0],
+  int upper_limit_replica = 1 + static_cast<int>(current_f0 * fft_size / fs);
+  interp1Q(current_f0 - low_frequency_axis[0],
       -static_cast<double>(fs) / fft_size, input, upper_limit + 1,
       low_frequency_axis, upper_limit_replica, low_frequency_replica);
 
@@ -74,6 +82,10 @@ void DCCorrection(const double *input, double f0, int fs, int fft_size,
   delete[] low_frequency_axis;
 }
 
+//-----------------------------------------------------------------------------
+// LinearSmoothing() carries out the spectral smoothing by rectangular window
+// whose length is width Hz and is used in CheapTrick() and D4C().
+//-----------------------------------------------------------------------------
 void LinearSmoothing(const double *input, double width, int fs, int fft_size,
     double *output) {
   int boundary = static_cast<int>(width * fft_size / fs) + 1;
@@ -87,7 +99,8 @@ void LinearSmoothing(const double *input, double width, int fs, int fft_size,
 
   double *low_levels = new double[fft_size / 2 + 1];
   double *high_levels = new double[fft_size / 2 + 1];
-  double origin_of_mirroring_axis = -(boundary - 0.5) * fs / fft_size;
+  double origin_of_mirroring_axis =
+    -(static_cast<double>(boundary) - 0.5) * fs / fft_size;
   double discrete_frequency_interval = static_cast<double>(fs) / fft_size;
 
   interp1Q(origin_of_mirroring_axis, discrete_frequency_interval,
@@ -110,10 +123,14 @@ void LinearSmoothing(const double *input, double width, int fs, int fft_size,
   delete[] high_levels;
 }
 
+//-----------------------------------------------------------------------------
+// NuttallWindow() calculates the coefficients of Nuttall window whose length
+// is y_length and is used in Dio() and D4C().
+//-----------------------------------------------------------------------------
 void NuttallWindow(int y_length, double *y) {
   double tmp;
   for (int i = 0; i < y_length; ++i) {
-    tmp  = i / (y_length - 1.0);
+    tmp  = static_cast<double>(i) / (y_length - 1);
     y[i] = 0.355768 - 0.487396 * cos(2.0 * world::kPi * tmp) +
       0.144232 * cos(4.0 * world::kPi * tmp) -
       0.012604 * cos(6.0 * world::kPi * tmp);
@@ -148,22 +165,6 @@ void DestroyInverseRealFFT(InverseRealFFT *inverse_real_fft) {
   fft_destroy_plan(inverse_real_fft->inverse_fft);
   delete[] inverse_real_fft->spectrum;
   delete[] inverse_real_fft->waveform;
-}
-
-void InitializeInverseComplexFFT(int fft_size,
-    InverseComplexFFT *inverse_complex_fft) {
-  inverse_complex_fft->fft_size = fft_size;
-  inverse_complex_fft->input = new fft_complex[fft_size];
-  inverse_complex_fft->output = new fft_complex[fft_size];
-  inverse_complex_fft->inverse_fft = fft_plan_dft_1d(fft_size,
-    inverse_complex_fft->input, inverse_complex_fft->output,
-    FFT_BACKWARD, FFT_ESTIMATE);
-}
-
-void DestroyInverseComplexFFT(InverseComplexFFT *inverse_complex_fft) {
-  fft_destroy_plan(inverse_complex_fft->inverse_fft);
-  delete[] inverse_complex_fft->input;
-  delete[] inverse_complex_fft->output;
 }
 
 void InitializeMinimumPhaseAnalysis(int fft_size,

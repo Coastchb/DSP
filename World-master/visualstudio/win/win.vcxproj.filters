@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
@@ -8,9 +8,6 @@
     <Filter Include="test">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="tools">
-      <UniqueIdentifier>{aa4c465e-ed4e-412e-b0ca-2e59aca506ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,17 +38,14 @@
     <ClCompile Include="..\..\src\synthesis.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\synthesisrealtime.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tools\audioio.cpp">
-      <Filter>tools</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\harvest.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\test\audioio.cpp">
+      <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\test\audioio.h">
+      <Filter>test</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\world\cheaptrick.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -80,15 +74,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\world\synthesis.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\world\synthesisrealtime.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\tools\audioio.h">
-      <Filter>tools</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\world\harvest.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

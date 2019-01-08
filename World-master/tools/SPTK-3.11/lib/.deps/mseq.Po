@@ -1,1 +1,0 @@
-mseq.o: mseq.c

@@ -1,7 +1,6 @@
 //-----------------------------------------------------------------------------
-// Copyright 2012 Masanori Morise
+// Copyright 2012-2016 Masanori Morise. All Rights Reserved.
 // Author: mmorise [at] yamanashi.ac.jp (Masanori Morise)
-// Last update: 2017/02/01
 //
 // These functions and variables are defined to use FFT as well as FFTW
 // Please see fft.cpp to show the detailed information
